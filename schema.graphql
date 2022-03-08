@@ -1,0 +1,721 @@
+type Account implements Node {
+  id: ID!
+  address: ID!
+  balance: String!
+  keys: [AccountKey!]!
+  domainNames: [DomainName!]!
+  keyChanges: [KeyChange!]!
+  contracts(options: ConnectionOptions): ContractConnection!
+  creationEvent: Event
+  transactions(
+    first: Int
+    after: String
+    skip: Int
+    role: TransactionRole
+  ): TransactionConnection!
+  transfers(
+    take: Int
+    after: ID
+    tokenId: ID
+    orderType: SortingMode
+    assetType: AssetType
+  ): TransferTransactionConnection!
+  balances(
+    first: Int
+    offset: Int
+    tokenId: [ID!]
+    excludeTokenId: [ID!]
+  ): AccountTokenBalanceConnection!
+  nfts(
+    first: Int
+    after: String
+    orderBy: String
+    orderType: SortingMode
+    tokenId: [ID!]
+  ): NFTConnection!
+  delegator: Delegator
+}
+
+type AccountConnection {
+  edges: [AccountEdge!]!
+  pageInfo: PageInfo!
+}
+
+type AccountEdge {
+  cursor: String!
+  node: Account
+}
+
+type AccountKey {
+  publicKey: ID!
+  signatureAlgo: SignatureAlgorithm!
+  hashAlgo: HashAlgorithm!
+  weight: Int!
+  sequenceNumber: String!
+  revoked: Boolean!
+}
+
+input AccountQuery {
+  options: ConnectionOptions
+  creationTime: TimeFilter
+  creationHeight: HeightFilter
+  addresses: [ID!]
+}
+
+type AccountTokenBalance {
+  amount: TokenAmount!
+  stale: Boolean!
+}
+
+type AccountTokenBalanceConnection {
+  count: Int!
+  edges: [AccountTokenBalance!]!
+}
+
+enum AssetType {
+  FungibleToken
+  NonFungibleToken
+}
+
+type Block implements Node {
+  id: ID!
+  height: Int!
+  time: Time!
+  transactions: TransactionConnection
+  events: EventConnection
+}
+
+type BlockConnection {
+  edges: [BlockEdge!]!
+  pageInfo: PageInfo!
+}
+
+type BlockEdge {
+  cursor: String!
+  node: Block
+}
+
+input BlockQuery {
+  options: ConnectionOptions
+  time: TimeFilter
+  height: HeightFilter
+}
+
+type CheckTransactionResponse {
+  id: ID!
+  status: TransactionStatus!
+  transaction: Transaction
+}
+
+type CirculationChangeConnection {
+  edges: [CirculationChangeEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type CirculationChangeEdge {
+  cursor: String!
+  node: SupplyChange!
+}
+
+input ConnectionOptions {
+  skip: Int
+  take: Int
+  sortBy: String
+  sortingMode: SortingMode
+  after: String
+  before: String
+}
+
+type Contract implements Node {
+  id: ID!
+  locked: Boolean!
+  deleted: Boolean!
+  type: ContractType!
+  address: ID!
+  identifier: String!
+  code: String!
+  account: Account!
+  tokenInfo: TokenInfo
+  deployments(
+    first: Int
+    after: String
+    skip: Int
+  ): ContractDeploymentConnection
+  interactions(
+    limit: Int
+    offset: Int
+    sortingMode: SortingMode
+  ): TransactionConnection
+}
+
+type ContractConnection {
+  edges: [ContractEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type ContractDeployment {
+  patches: String!
+  event: Event!
+}
+
+type ContractDeploymentConnection {
+  edges: [ContractDeploymentEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type ContractDeploymentEdge {
+  cursor: String!
+  node: ContractDeployment
+}
+
+type ContractEdge {
+  cursor: String!
+  node: Contract
+}
+
+input ContractQuery {
+  options: ConnectionOptions
+  creationTime: TimeFilter
+  creationHeight: HeightFilter
+  ids: [ID!]
+  addresses: [ID!]
+}
+
+enum ContractType {
+  Default
+  FungibleToken
+  NonFungibleToken
+  Interface
+}
+
+scalar Date
+
+type Delegator {
+  lockedAddress: ID
+  unlockLimit: String
+  delegatorId: Int!
+  nodeOperator: NodeOperator!
+  committed: String!
+  staked: String!
+  unstaking: String!
+  unstaked: String!
+  rewarded: String!
+  requestedToUnstake: String!
+  account: Account
+}
+
+type DelegatorConnection {
+  edges: [DelegatorEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type DelegatorEdge {
+  cursor: String!
+  node: Delegator
+}
+
+type DomainName {
+  name: String!
+  fullName: String!
+  provider: ID!
+}
+
+type Event implements Node {
+  id: ID!
+  hash: ID!
+  indexInTransaction: Int!
+  fields: [JSON!]!
+  time: Time!
+  eventType: EventType!
+  transaction: Transaction!
+}
+
+type EventConnection {
+  edges: [EventEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type EventEdge {
+  cursor: String!
+  node: Event
+}
+
+enum EventFieldDataType {
+  Unknown
+  UInt8
+  UInt16
+  UInt32
+  UInt64
+  UInt128
+  UInt256
+  Int8
+  Int16
+  Int32
+  Int64
+  Int128
+  Int256
+  Word8
+  Word16
+  Word32
+  Word64
+  Fix64
+  UFix64
+  Address
+  AnyStruct
+  AnyResource
+  String
+  Character
+}
+
+type EventType {
+  fullId: ID!
+  fields: [EventTypeField!]!
+  contract: Contract!
+}
+
+type EventTypeField {
+  type: String!
+  identifier: String!
+}
+
+enum FilteringMode {
+  Any
+  And
+}
+
+type FlowTokenInfo {
+  totalSupply: String!
+  circulatingSupply: String!
+}
+
+input FungibleTokenTransferFilter {
+  tokenId: [ID!]
+  from: [ID!]
+  to: [ID!]
+}
+
+enum HashAlgorithm {
+  UnknownHashAlgorithm
+  SHA2_256
+  SHA2_384
+  SHA3_256
+  SHA3_384
+}
+
+input HeightFilter {
+  start: Int
+  end: Int
+}
+
+enum Interval {
+  Daily
+  Weekly
+  Monthly
+  Yearly
+}
+
+scalar JSON
+
+type KeyChange {
+  type: KeyChangeType!
+  publicKey: String!
+  event: Event!
+}
+
+enum KeyChangeType {
+  ADD
+  REMOVE
+}
+
+type NFT implements Node {
+  id: ID!
+  contract: Contract!
+  nftId: String!
+  owner: Account!
+  transfers(
+    first: Int
+    after: String
+    orderType: SortingMode
+  ): NFTTransferConnection!
+}
+
+type NFTConnection {
+  edges: [NFTEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type NFTEdge {
+  cursor: String!
+  node: NFT
+}
+
+type NFTTransfer {
+  nft: NFT!
+  transaction: Transaction!
+  from: Account
+  to: Account
+}
+
+type NFTTransferConnection {
+  edges: [NFTTransferEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type NFTTransferEdge {
+  cursor: String!
+  node: NFTTransfer
+}
+
+interface Node {
+  id: ID!
+}
+
+type NodeOperator {
+  id: ID!
+  active: Boolean!
+  proposed: Boolean!
+  name: String
+  role: NodeRole!
+  networkingAddress: String!
+  networkingKey: String!
+  stakingKey: String!
+  tokensStaked: String!
+  tokensDelegated: String!
+  totalTokensStaked: String!
+  tokensCommitted: String!
+  tokensUnstaking: String!
+  tokensUnstaked: String!
+  tokensRewarded: String!
+  tokensRequestedToUnstake: String!
+  delegatorCounter: Int!
+  initialWeight: Int!
+  delegators(
+    first: Int
+    after: String
+    skip: Int
+    orderBy: String
+  ): DelegatorConnection
+}
+
+type NodeOperatorConnection {
+  edges: [NodeOperatorEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type NodeOperatorEdge {
+  cursor: String!
+  node: NodeOperator
+}
+
+enum NodeRole {
+  Collection
+  Consensus
+  Execution
+  Verification
+  Access
+}
+
+enum NodeType {
+  Block
+  Transaction
+  Event
+  Account
+  Contract
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String!
+  endCursor: String!
+}
+
+type PastEpoch {
+  index: Int!
+  start: Time!
+  totalStaked: String!
+  totalRewarded: String!
+}
+
+type Query {
+  node(id: ID!): Node
+  block(height: Int!): Block
+  transaction(id: ID!): Transaction
+  event(id: ID!): Event
+  account(id: ID!): Account
+  accountByDomain(domain: ID!): Account
+  contract(id: ID!): Contract
+  tokenInfo(id: ID!): TokenInfo
+  nft(id: ID!): NFT
+  checkTransaction(id: ID!): CheckTransactionResponse
+  staking: StakingEpoch
+  nodeOperator(id: ID!): NodeOperator
+  pastEpochs(from: Int, to: Int): [PastEpoch!]!
+  blockTime(height: Int!): Time
+  typeOf(id: ID!): NodeType
+  flowToken: FlowTokenInfo!
+  metrics(
+    metric: String!
+    interval: Interval!
+    startDate: Date
+    endDate: Date
+  ): [TimeSeriesData!]!
+}
+
+type RewardRatio {
+  role: NodeRole!
+  ratio: Int!
+}
+
+type Signature {
+  account: Account!
+  signerIndex: Int!
+  keyIndex: Int!
+  signature: String!
+}
+
+enum SignatureAlgorithm {
+  UnknownSignatureAlgorithm
+  BLS_BLS12381
+  ECDSA_P256
+  ECDSA_secp256k1
+}
+
+enum SortingMode {
+  Ascending
+  Descending
+}
+
+type StakingEpoch {
+  start: Time!
+  tokenPayout: String!
+  delegationRewardCut: String!
+  rewardRatio(role: NodeRole!): Int!
+  totalCommitted(type: StakingType, role: NodeRole): String!
+  totalStaked(type: StakingType, role: NodeRole): String!
+  totalUnstaking(type: StakingType, role: NodeRole): String!
+  totalUnstaked(type: StakingType, role: NodeRole): String!
+  totalRewarded(type: StakingType, role: NodeRole): String!
+  totalRequestedUnstake(type: StakingType, role: NodeRole): String!
+  totalDelegators(role: NodeRole): Int!
+  nodesCount(role: NodeRole, active: Boolean, proposed: Boolean): Int!
+  apy: String!
+  nodeOperators(
+    first: Int
+    after: String
+    skip: Int
+    role: NodeRole
+    orderBy: String
+    orderType: SortingMode
+    active: Boolean
+    proposed: Boolean
+  ): NodeOperatorConnection!
+}
+
+enum StakingType {
+  Node
+  Delegate
+}
+
+type SupplyChange {
+  time: Time!
+  reason: String!
+  amount: String!
+  type: SupplyChangeType!
+}
+
+enum SupplyChangeType {
+  Increase
+  Decrease
+}
+
+scalar Time
+
+input TimeFilter {
+  start: Time
+  end: Time
+}
+
+type TimeSeriesData {
+  time: String!
+  value: Int!
+}
+
+type TokenAmount {
+  token: TokenInfo!
+  value: String!
+}
+
+type TokenAmountConnection {
+  edges: [TokenAmountEdge!]!
+  pageInfo: PageInfo!
+}
+
+type TokenAmountEdge {
+  cursor: String!
+  node: TokenAmount
+}
+
+type TokenHolder {
+  account: Account!
+  amount: String!
+}
+
+type TokenHolderConnection {
+  count: Int!
+  edges: [TokenHolderEdge!]!
+  pageInfo: PageInfo!
+}
+
+type TokenHolderEdge {
+  cursor: String!
+  node: TokenHolder
+}
+
+type TokenInfo implements Node {
+  id: ID!
+  label: String
+  ticker: String
+  description: String
+  price: Float
+  totalSupply: String
+  contract: Contract!
+  transfers(
+    take: Int
+    after: ID
+    orderType: SortingMode
+    accountIDs: [ID!]
+  ): TransferTransactionConnection!
+  holders(first: Int, after: ID): TokenHolderConnection!
+}
+
+type TokenTransfer {
+  id: ID!
+  type: TransferType!
+  amount: TokenAmount!
+  transaction: Transaction!
+  account: Account!
+  counterparty: Account
+  counterpartiesCount: Int!
+}
+
+type TokenTransferConnection {
+  edges: [TokenTransferEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type TokenTransferEdge {
+  cursor: String!
+  node: TokenTransfer
+}
+
+type Transaction implements Node {
+  id: ID!
+  hash: ID!
+  statusCode: Int!
+  status: TransactionStatus!
+  keyIndex: Int!
+  sequenceNumber: Int!
+  gasLimit: Int!
+  script: String!
+  arguments: JSON!
+  error: String
+  eventCount: Int!
+  time: Time!
+  payer: Account!
+  proposer: Account!
+  authorizers: [Account!]!
+  payloadSignatures: [Signature!]!
+  envelopeSignatures: [Signature!]!
+  block: Block
+  index: Int
+  referenceBlock: Block!
+  contractInteractions: [Contract!]!
+  eventTypes(contractIds: [ID!]): [EventType!]!
+  events(first: Int, skip: Int, type: [ID!]): EventConnection!
+  transfers(tokenIds: [String!], assetType: AssetType): [Transfer!]
+}
+
+type TransactionConnection {
+  edges: [TransactionEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type TransactionEdge {
+  cursor: String!
+  node: Transaction
+}
+
+input TransactionQuery {
+  options: ConnectionOptions
+  time: TimeFilter
+  height: HeightFilter
+  role: TransactionRoleFilter
+}
+
+enum TransactionRole {
+  Authorizer
+  Proposer
+  Payer
+  PayloadSigner
+  EnvelopeSigner
+}
+
+input TransactionRoleFilter {
+  role: TransactionRole
+  account: ID!
+}
+
+enum TransactionStatus {
+  UNKNOWN
+  PENDING
+  FINALIZED
+  EXECUTED
+  SEALED
+  EXPIRED
+}
+
+union Transfer = TokenTransfer | NFTTransfer
+type TransferConnection {
+  edges: [TransferEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type TransferEdge {
+  cursor: ID!
+  node: Transfer
+}
+
+type TransferTransaction {
+  transaction: Transaction!
+  fungibleTokenTransfers: [TokenTransfer!]!
+  nftTransfers: [NFTTransfer!]!
+}
+
+type TransferTransactionConnection {
+  edges: [TransferTransactionEdge!]!
+  pageInfo: PageInfo!
+  count: Int!
+}
+
+type TransferTransactionEdge {
+  cursor: ID!
+  node: TransferTransaction
+}
+
+enum TransferType {
+  Deposit
+  Withdraw
+}
+
