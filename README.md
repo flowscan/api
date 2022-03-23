@@ -8,7 +8,7 @@ Currently due to infrastructure limitations we need to know our users usage befo
 
 ## General Limitations
 
-- Every request to our API endpoint is still rate-limited at 6 requests / second per-API
+- Every request to our API endpoint is still rate-limited at 6 requests / second per-IP
 - GraphQL types does not have descriptions yet 
 
 ## GraphQL Queries
